@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Plus, History, LogOut, Moon, Sun, Trash2 } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useAuthenticator } from "@aws-amplify/ui-react"
 
 interface Chat {
   id: string
@@ -26,13 +27,11 @@ interface Chat {
 
 export function ChatSidebar() {
   const [chats, setChats] = useState<Chat[]>([
-    { id: "1", title: "Document Analysis Q&A", timestamp: "2 hours ago" },
-    { id: "2", title: "Policy Questions", timestamp: "1 day ago" },
-    { id: "3", title: "Research Assistance", timestamp: "3 days ago" },
   ])
   const [activeChat, setActiveChat] = useState("1")
   const { theme, setTheme } = useTheme()
   const router = useRouter()
+  const { signOut } = useAuthenticator()
 
   const handleNewChat = () => {
     const newChat: Chat = {
@@ -54,16 +53,15 @@ export function ChatSidebar() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated")
-    router.push("/")
+    signOut()
   }
 
   return (
-    <Sidebar className="bg-white/10 backdrop-blur-md border-r border-white/20">
+    <Sidebar className="bg-gray-100/60 dark:bg-white/10 backdrop-blur-md border-r border-gray-900/10 dark:border-white/20">
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="text-xl font-bold text-white">
+            <div className="text-xl font-bold text-gray-900 dark:text-white">
               enza
               <span className="text-emerald-400 ml-1">✚</span>
             </div>
@@ -72,7 +70,7 @@ export function ChatSidebar() {
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="text-white hover:bg-white/20"
+            className="text-gray-900 dark:text-white hover:bg-gray-900/10 dark:hover:bg-white/20"
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
@@ -84,29 +82,29 @@ export function ChatSidebar() {
         </Button>
       </SidebarHeader>
 
-      <SidebarSeparator className="bg-white/20" />
+      <SidebarSeparator className="bg-gray-900/10 dark:bg-white/20" />
 
       <SidebarContent className="p-2">
         <div className="mb-4">
-          <h3 className="text-sm font-medium text-white/90 mb-2 px-2">Recent Chats</h3>
+          <h3 className="text-sm font-medium text-gray-800 dark:text-white/90 mb-2 px-2">Recent Chats</h3>
           <SidebarMenu>
             {chats.map((chat) => (
               <SidebarMenuItem key={chat.id}>
                 <SidebarMenuButton
                   isActive={activeChat === chat.id}
                   onClick={() => setActiveChat(chat.id)}
-                  className="w-full justify-start text-white/95 hover:bg-white/20 data-[active=true]:bg-emerald-600/70 data-[active=true]:text-white group"
+                  className="w-full justify-start text-gray-800 dark:text-white/95 hover:bg-gray-900/10 dark:hover:bg-white/20 data-[active=true]:bg-emerald-600/70 data-[active=true]:text-white group"
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
                   <div className="flex-1 min-w-0">
                     <div className="truncate text-sm">{chat.title}</div>
-                    <div className="text-xs text-white/75">{chat.timestamp}</div>
+                    <div className="text-xs text-gray-600 dark:text-white/75">{chat.timestamp}</div>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={(e) => handleDeleteChat(chat.id, e)}
-                    className="opacity-0 group-hover:opacity-100 h-6 w-6 text-white/50 hover:text-red-400 hover:bg-red-500/20"
+                    className="opacity-0 group-hover:opacity-100 h-6 w-6 text-gray-500 dark:text-white/50 hover:text-red-400 hover:bg-red-500/20"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -117,10 +115,10 @@ export function ChatSidebar() {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-white/90 mb-2 px-2">History</h3>
+          <h3 className="text-sm font-medium text-gray-800 dark:text-white/90 mb-2 px-2">History</h3>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className="text-white/95 hover:bg-white/20">
+              <SidebarMenuButton className="text-gray-800 dark:text-white/95 hover:bg-gray-900/10 dark:hover:bg-white/20">
                 <History className="h-4 w-4 mr-2" />
                 View All Conversations
               </SidebarMenuButton>
@@ -129,13 +127,13 @@ export function ChatSidebar() {
         </div>
       </SidebarContent>
 
-      <SidebarSeparator className="bg-white/20" />
+      <SidebarSeparator className="bg-gray-900/10 dark:bg-white/20" />
 
       <SidebarFooter className="p-4">
         <Button
           variant="ghost"
           onClick={handleLogout}
-          className="w-full justify-start text-white hover:bg-red-500/20 hover:text-red-300"
+          className="w-full justify-start text-gray-800 dark:text-white hover:bg-red-500/20 hover:text-red-300"
         >
           <LogOut className="h-4 w-4 mr-2" />
           Sign Out

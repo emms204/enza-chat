@@ -117,7 +117,7 @@ Would you like me to elaborate on any of these points?`,
                 className={`max-w-[80%] p-4 ${
                   message.type === "user"
                     ? "bg-emerald-600 text-white border-emerald-500"
-                    : "bg-white/90 backdrop-blur-sm border-white/20"
+                    : "bg-white/90 text-gray-900 dark:bg-gray-800 dark:text-gray-100 backdrop-blur-sm border-white/20 dark:border-gray-700"
                 }`}
               >
                 <div className="space-y-2">
@@ -125,18 +125,18 @@ Would you like me to elaborate on any of these points?`,
 
                   {message.sources && (
                     <div className="mt-3 space-y-2">
-                      <p className="text-xs font-medium text-gray-600">Sources:</p>
+                      <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Sources:</p>
                       {message.sources.map((source, index) => (
-                        <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2">
-                                <FileText className="h-3 w-3 text-gray-500" />
-                                <span className="text-xs font-medium text-gray-700">{source.title}</span>
+                                <FileText className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{source.title}</span>
                               </div>
-                              <p className="text-xs text-gray-600 mt-1">{source.excerpt}</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{source.excerpt}</p>
                             </div>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700">
+                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                               <ExternalLink className="h-3 w-3" />
                             </Button>
                           </div>
@@ -182,7 +182,7 @@ Would you like me to elaborate on any of these points?`,
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question about your documents..."
-              className="flex-1 bg-white/90 backdrop-blur-sm border-white/30 focus:border-emerald-500 focus:ring-emerald-500"
+              className="flex-1 bg-white/90 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 backdrop-blur-sm border-white/30 dark:border-gray-700 focus:border-emerald-500 focus:ring-emerald-500"
               disabled={isLoading}
             />
             <Button
