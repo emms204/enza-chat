@@ -6,20 +6,19 @@ export const authTheme: Theme = {
     colors: {
       brand: {
         primary: {
-          "10": "{colors.green.100}",
-          "20": "{colors.green.90}",
-          "40": "{colors.green.60}",
-          "60": "{colors.green.60}",
-          "80": "{colors.emerald.600}",
-          "90": "{colors.emerald.500}",
-          "100": "{colors.emerald.400}",
+          "80": { value: "#0F766E" }, // A dark teal color
+          "90": { value: "#134E4A" }, // A darker teal for hover
         },
+      },
+      font: {
+        inverse: { value: "#FFFFFF" }, // White color for text
       },
     },
     components: {
       button: {
         primary: {
           backgroundColor: "{colors.brand.primary.80}",
+          color: "{colors.font.inverse}",
           _hover: {
             backgroundColor: "{colors.brand.primary.90}",
           },

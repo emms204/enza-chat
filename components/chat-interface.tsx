@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Send, FileText, ExternalLink } from "lucide-react"
+import { Send, FileText, ExternalLink, Upload } from "lucide-react"
+import UploadDialog from "./upload-dialog"
 
 interface Message {
   id: string
@@ -33,6 +34,7 @@ export function ChatInterface() {
     },
   ])
   const [input, setInput] = useState("")
+  const [showAddModal, setShowAddModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -43,6 +45,10 @@ export function ChatInterface() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  const handleUpload = () => {
+    setShowAddModal(true)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -104,9 +110,6 @@ Would you like me to elaborate on any of these points?`,
             <SidebarTrigger className="text-white hover:bg-white/20" />
             <h1 className="text-lg font-semibold text-white">Document Q&A Assistant</h1>
           </div>
-          <Badge variant="secondary" className="bg-emerald-600/20 text-emerald-300 border-emerald-500/30">
-            Online
-          </Badge>
         </div>
 
         {/* Messages */}
@@ -178,6 +181,9 @@ Would you like me to elaborate on any of these points?`,
         {/* Input */}
         <div className="p-4 bg-white/10 backdrop-blur-md border-t border-white/20">
           <form onSubmit={handleSubmit} className="flex space-x-2">
+            <Button variant="outline" size="icon" onClick={handleUpload}>
+              <Upload className="h-4 w-4" />
+            </Button>
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -194,6 +200,7 @@ Would you like me to elaborate on any of these points?`,
             </Button>
           </form>
         </div>
+        <UploadDialog showAddModal={showAddModal} setShowAddModal={setShowAddModal} />
       </div>
     </SidebarInset>
   )
