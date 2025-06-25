@@ -10,15 +10,17 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Send, FileText, ExternalLink, Upload } from "lucide-react"
 import UploadDialog from "./upload-dialog"
+import queryKnowledgeBase from "@/services/chat_service"
 
 interface Message {
   id: string
   type: "user" | "assistant"
   content: string
   sources?: Array<{
-    title: string
-    url: string
-    excerpt: string
+    content: string;
+    metadata: any;
+    location: any;
+    score: number;
   }>
   timestamp: Date
 }
@@ -65,40 +67,31 @@ export function ChatInterface() {
     setInput("")
     setIsLoading(true)
 
-    // Simulate AI response with sources
-    setTimeout(() => {
+    try {
+      const response = await queryKnowledgeBase(input)
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "assistant",
-        content: `Based on your question about "${input}", I found relevant information in your documents. The key points are:
-
-1. This topic is covered extensively in the policy documentation
-2. There are specific guidelines that apply to this scenario
-3. Recent updates have been made to the procedures
-
-Would you like me to elaborate on any of these points?`,
-        sources: [
-          {
-            title: "Company Policy Manual v2.3",
-            url: "#",
-            excerpt: "Section 4.2 covers the specific procedures and guidelines...",
-          },
-          {
-            title: "Updated Guidelines Document",
-            url: "#",
-            excerpt: "Recent changes to the policy include new requirements...",
-          },
-          {
-            title: "FAQ Document",
-            url: "#",
-            excerpt: "Common questions and answers related to this topic...",
-          },
-        ],
+        content: response.answer,
+        sources: response.sources,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, assistantMessage])
+    } catch (error) {
+      console.error('Chat error:', error)
+      
+      // Show error message to user
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: "assistant",
+        content: "Sorry, I encountered an error while processing your request. Please check the console for more details.",
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   return (
@@ -129,22 +122,86 @@ Would you like me to elaborate on any of these points?`,
                   {message.sources && (
                     <div className="mt-3 space-y-2">
                       <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Sources:</p>
-                      {message.sources.map((source, index) => (
-                        <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2">
-                                <FileText className="h-3 w-3 text-gray-500 dark:text-gray-400" />
-                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{source.title}</span>
+                      {message.sources.map((source, index) => {
+                        // Debug: Log the source structure to understand the object format
+                        console.log('Source object:', source);
+                        console.log('Source location:', source.location);
+                        
+                        // Safe function to extract location text
+                        const getLocationText = (location: any): string => {
+                          if (typeof location === 'string') {
+                            return location;
+                          }
+                          
+                          if (typeof location === 'object' && location !== null) {
+                            // Handle different possible object structures
+                            if (location.s3Location) {
+                              if (typeof location.s3Location === 'string') {
+                                return location.s3Location;
+                              }
+                              if (typeof location.s3Location === 'object' && location.s3Location.uri) {
+                                return location.s3Location.uri;
+                              }
+                            }
+                            
+                            if (location.uri) {
+                              return location.uri;
+                            }
+                            
+                            // If we can't extract a specific field, convert the whole object to string
+                            return JSON.stringify(location);
+                          }
+                          
+                          return 'Unknown Source';
+                        };
+                        
+                        return (
+                          <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                            <div className="space-y-3">
+                              {/* Content Text */}
+                              <div>
+                                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content:</p>
+                                <p className="text-xs text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 p-2 rounded border">
+                                  {source.content || 'No content available'}
+                                </p>
                               </div>
-                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{source.excerpt}</p>
+                              
+                              {/* Metadata */}
+                              {source.metadata && Object.keys(source.metadata).length > 0 && (
+                                <div>
+                                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Metadata:</p>
+                                  <div className="text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 p-2 rounded border">
+                                    {Object.entries(source.metadata).map(([key, value]) => (
+                                      <div key={key} className="flex justify-between py-1">
+                                        <span className="font-medium">{key}:</span>
+                                        <span className="ml-2">{String(value)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Source info at bottom */}
+                              <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
+                                <div className="flex items-center space-x-2">
+                                  <FileText className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                                    {getLocationText(source.location)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    Score: {source.score?.toFixed(3)}
+                                  </span>
+                                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                              <ExternalLink className="h-3 w-3" />
-                            </Button>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
@@ -181,7 +238,7 @@ Would you like me to elaborate on any of these points?`,
         {/* Input */}
         <div className="p-4 bg-white/10 backdrop-blur-md border-t border-white/20">
           <form onSubmit={handleSubmit} className="flex space-x-2">
-            <Button variant="outline" size="icon" onClick={handleUpload}>
+            <Button variant="outline" size="icon" type="button" onClick={handleUpload}>
               <Upload className="h-4 w-4" />
             </Button>
             <Input

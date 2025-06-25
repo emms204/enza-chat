@@ -4,4 +4,4 @@ node_modules
 amplify_outputs*
 amplifyconfiguration*
 .next
-
+tsconfig.tsbuildinfo
