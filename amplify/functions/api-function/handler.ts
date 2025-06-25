@@ -12,20 +12,32 @@ interface ClaudeResponse {
   }>;
 }
 
-// CORS headers for responses
-const corsHeaders = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "http://localhost:3000,https://main.d2u0pycjfm8zuu.amplifyapp.com", // Specific origin instead of wildcard
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Amz-Date, X-Api-Key, X-Amz-Security-Token, X-Amz-User-Agent, X-Amz-Content-Sha256",
-  "Access-Control-Allow-Credentials": "true"
+// Allowed origins for CORS
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'https://localhost:3000',
+  'https://main.d2u0pycjfm8zuu.amplifyapp.com'
+];
+
+// Function to get appropriate CORS headers based on request origin
+const getCorsHeaders = (event: APIGatewayProxyEvent) => {
+  const origin = event.headers.origin || event.headers.Origin || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  
+  return {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Amz-Date, X-Api-Key, X-Amz-Security-Token, X-Amz-User-Agent, X-Amz-Content-Sha256",
+    "Access-Control-Allow-Credentials": "true"
+  };
 };
 
 // Helper function to ensure CORS headers are always returned
-const createResponse = (statusCode: number, body: any): APIGatewayProxyResult => {
+const createResponse = (statusCode: number, body: any, event: APIGatewayProxyEvent): APIGatewayProxyResult => {
   return {
     statusCode,
-    headers: corsHeaders,
+    headers: getCorsHeaders(event),
     body: typeof body === 'string' ? body : JSON.stringify(body)
   };
 };
@@ -33,7 +45,7 @@ const createResponse = (statusCode: number, body: any): APIGatewayProxyResult =>
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // Handle preflight OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
-    return createResponse(200, '');
+    return createResponse(200, '', event);
   }
 
   // Parse the incoming request
@@ -44,12 +56,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       query = body.query || "";
     } catch (e) {
       console.error("Error parsing request body:", e);
-      return createResponse(400, { error: "Invalid request body" });
+      return createResponse(400, { error: "Invalid request body" }, event);
     }
   }
   
   if (!query) {
-    return createResponse(400, { error: "Query parameter is required" });
+    return createResponse(400, { error: "Query parameter is required" }, event);
   }
 
   try {
@@ -135,7 +147,7 @@ ${retrievedPassages}`
         location: result.location,
         score: result.score
       })) || []
-    });
+    }, event);
   } catch (error: any) {
     console.error("Detailed error information:");
     console.error("Error name:", error.name);
@@ -149,6 +161,6 @@ ${retrievedPassages}`
       error: "An error occurred while processing your request.",
       details: error.message || "Unknown error",
       errorType: error.name || "Unknown"
-    });
+    }, event);
   }
 };
