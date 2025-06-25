@@ -15,7 +15,7 @@ interface ClaudeResponse {
 // CORS headers for responses
 const corsHeaders = {
   "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "http://localhost:3000", // Specific origin instead of wildcard
+  "Access-Control-Allow-Origin": "http://localhost:3000,https://main.d2u0pycjfm8zuu.amplifyapp.com/", // Specific origin instead of wildcard
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Amz-Date, X-Api-Key, X-Amz-Security-Token, X-Amz-User-Agent, X-Amz-Content-Sha256",
   "Access-Control-Allow-Credentials": "true"
