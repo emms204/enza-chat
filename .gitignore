@@ -6,3 +6,4 @@ amplifyconfiguration*
 .next
 tsconfig.tsbuildinfo
 MIGRATION_STATUS.md
+.env

@@ -68,14 +68,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     // Initialize the Bedrock Agent Runtime client with timeout configuration
     const agentClient = new BedrockAgentRuntimeClient({ 
-      region: process.env.REGION || "us-east-1",
+      region: process.env.REGION || "eu-west-1",
       requestHandler: {
         requestTimeout: 25000, // 25 seconds to allow for API Gateway timeout
       }
     });
     
     console.log("Using Knowledge Base ID:", process.env.KNOWLEDGE_BASE_ID);
-    console.log("Using Region:", process.env.REGION || "us-east-1");
+    console.log("Using Region:", process.env.REGION || "eu-west-1");
     
     // Retrieve information from the knowledge base
     const retrieveParams = {
@@ -106,7 +106,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     
     // Use Bedrock Runtime to generate a response using the retrieved information
     const runtimeClient = new BedrockRuntimeClient({ 
-      region: process.env.REGION || "us-east-1",
+      region: process.env.REGION || "eu-west-1",
       requestHandler: {
         requestTimeout: 20000, // 20 seconds for model generation
       }
@@ -124,10 +124,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             role: "user",
             content: `You are an AI assistant that answers questions based on the provided knowledge base information.
 
-Based on the following information, please answer this question: ${query}
+            Based on the following information, please answer this question: ${query}
 
-Knowledge base information:
-${retrievedPassages}`
+            Knowledge base information:
+            ${retrievedPassages}`
           }
         ]
       })
